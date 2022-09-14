@@ -17,7 +17,10 @@ export class CdkWorkshopStack extends Stack {
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
           resources: ['*'],
-          actions: ['cloudwatch:PutMetricData'],
+          actions: [
+            'aps:RemoteWrite',
+            'cloudwatch:PutMetricData'
+          ],
         }),
       ],
     });
@@ -31,12 +34,19 @@ export class CdkWorkshopStack extends Stack {
 
     const adotLayer = lambda.LayerVersion.fromLayerVersionArn(this, "adotLayer", "arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-python-amd64-ver-1-12-0:1");
 
+    const configLayer = new lambda.LayerVersion(this, 'config-layer', {
+      code: lambda.Code.fromAsset(path.join(__dirname, '../config')),
+    });
+
     const fn = new lambda.Function(this, 'DemoFunction', {
-      runtime: lambda.Runtime.PYTHON_3_7,
+      runtime: lambda.Runtime.PYTHON_3_9,
       handler: 'sample-lambda.sample_handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../sample_lambda')),
       role: myRole,
-      layers: [adotLayer],
+      layers: [adotLayer, configLayer],
+      environment: {
+        'OPENTELEMETRY_COLLECTOR_CONFIG_FILE': '/opt/collector.yaml',
+      }
     });
   }
 }

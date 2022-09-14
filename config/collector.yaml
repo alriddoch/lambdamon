@@ -1,0 +1,10 @@
+extensions:
+  sigv4auth:
+    service: "aps"
+    region: "user-region"
+
+exporters:
+  prometheusremotewrite:
+    endpoint: "https://aws-managed-prometheus-endpoint/v1/api/remote_write"
+    auth:
+      authenticator: sigv4auth
