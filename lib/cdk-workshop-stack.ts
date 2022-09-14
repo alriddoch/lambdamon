@@ -4,8 +4,12 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as path from 'path';
 import { Construct } from 'constructs';
 
+export interface WorkshopProps extends StackProps {
+  workspaceId: string,
+}
+
 export class CdkWorkshopStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: WorkshopProps) {
     super(scope, id, props);
 
     const allowMetrics = new iam.PolicyDocument({
@@ -25,11 +29,14 @@ export class CdkWorkshopStack extends Stack {
       },
     });
 
+    const adotLayer = lambda.LayerVersion.fromLayerVersionArn(this, "adotLayer", "arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-python-amd64-ver-1-12-0:1");
+
     const fn = new lambda.Function(this, 'DemoFunction', {
       runtime: lambda.Runtime.PYTHON_3_7,
       handler: 'sample-lambda.sample_handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../sample_lambda')),
       role: myRole,
+      layers: [adotLayer],
     });
   }
 }
