@@ -12,6 +12,7 @@ export class AmpStack extends Stack {
     super(scope, id, props);
 
     const cfnWorkspace = new aps.CfnWorkspace(this, 'DemoWorkspace', /* all optional props */ {
+      alias: 'prometheus-demo-recipe',
       tags: [{
         key: 'team',
         value: 'Demo',
